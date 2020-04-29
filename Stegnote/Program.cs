@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Text;
 using Stegnote.Models;
 using Color = System.Drawing.Color;
 
-namespace WpfApp1
+namespace Stegnote
 {
     public class MainCalculations
     {
@@ -45,10 +46,12 @@ namespace WpfApp1
         
         public void ExecuteEncrypt()
         {
-            Coordinates coordinates = getFirstRandomCoordinates(downloadedImage);
+            Coordinates firstCoordinates = getFirstRandomCoordinates(downloadedImage);
             string textBlock = Message.ToLower();
-            int offsetCount = CalcuteOffset(coordinates);
+            int offsetCount = CalcuteOffset(firstCoordinates);
             OutputInfo.offset = offsetCount;
+            var symbolsAndCoordinates = GetAllColors(textBlock, firstCoordinates, downloadedImage);
+            Console.WriteLine(); //TODO continue 
         }
 
         public void ExecuteDecrypt()
@@ -64,6 +67,79 @@ namespace WpfApp1
         {
             get => _message;
             set => _message = value.ToString();
+        }
+
+        private Dictionary<char, List<Coordinates>> GetAllColors(string text, Coordinates firstCoordinates, ImageInfo imageInfo)
+        {
+            Dictionary<char, List<Coordinates>> keyValues = new Dictionary<char, List<Coordinates>>();
+
+            Coordinates previousCoordinates = firstCoordinates;
+            for (int i = 0; i< text.Length; i++)
+            {
+                char symbol = text[i];
+                previousCoordinates = GetNextCoordinates(previousCoordinates, imageInfo);
+                if (keyValues.ContainsKey(symbol))
+                {
+                    keyValues[symbol].Add(previousCoordinates);
+                }
+                else
+                {
+                    keyValues.Add(symbol, new List<Coordinates>() { previousCoordinates });
+                }
+            }
+            return keyValues;
+        }
+
+        private bool checkIfColorExist()
+        {
+            return true; //TODO add to function that needed it
+        }
+
+
+        private Coordinates GetNextCoordinates(Coordinates previousCoordinates, ImageInfo imageInfo)
+        {
+            int maxX = imageInfo.Width;
+            int maxY = imageInfo.Height;
+
+            string joinedInfo =
+                Convert.ToString(previousCoordinates.X, 2) +
+                Convert.ToString(previousCoordinates.Y, 2) +
+                Convert.ToString(Convert.ToInt64(previousCoordinates.Color.Name, 16), 2);
+            int length = joinedInfo.Length;
+            string twoBytesX = string.Empty;
+            string twoBytesY = string.Empty;
+
+            int capacity = 16;
+
+            if (length >= capacity*2)
+            {
+                twoBytesX = joinedInfo.Substring(0, capacity);
+                twoBytesY = joinedInfo.Substring(length - capacity, capacity);
+            }
+            else
+            {
+                twoBytesX = joinedInfo.Substring(0, length / 2);
+                twoBytesY = joinedInfo.Substring(length / 2, length - length / 2);
+            }
+
+            int l1 = Convert.ToInt32(twoBytesX.ToString(), 2);
+            int l2 = Convert.ToInt32(twoBytesY.ToString(), 2);
+
+            int X = Convert.ToInt32(l1 | l2);
+            int Y = Convert.ToInt32(l1 ^ l2);
+
+            while (X > maxX)
+            {
+                X -= maxX;
+            }
+
+            while (Y > maxY)
+            {
+                Y -= maxY;
+            }
+
+            return new Coordinates(X, Y, imageInfo.Bitmap.GetPixel(X, Y));
+
         }
 
         private int CalcuteOffset(Coordinates firstCoordinates)

@@ -1,0 +1,6 @@
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/bin/Debug/Stegnote.exe
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/bin/Debug/Stegnote.pdb
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/obj/Debug/Stegnote.csprojAssemblyReference.cache
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/obj/Debug/Stegnote.csproj.CoreCompileInputs.cache
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/obj/Debug/Stegnote.exe
+/Users/olehstelmakh/Projects/Stegnote/Stegnote/obj/Debug/Stegnote.pdb

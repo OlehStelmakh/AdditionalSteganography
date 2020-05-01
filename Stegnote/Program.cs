@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Security.Cryptography;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
 using Stegnote.Models;
 using Color = System.Drawing.Color;
+using System.IO;
 
 namespace Stegnote
 {
@@ -40,7 +41,6 @@ namespace Stegnote
             int y = random.Next(image.Height);
             Color color = image.Bitmap.GetPixel(x, y);
             Coordinates coordinates = new Coordinates(x, y, color);
-            OutputInfo.first = coordinates;
             
             return coordinates;
         }
@@ -50,18 +50,57 @@ namespace Stegnote
             Coordinates firstCoordinates = getFirstRandomCoordinates(downloadedImage);
             string textBlock = Message.ToLower();
             int offsetCount = CalcuteOffset(firstCoordinates);
-            OutputInfo.offset = offsetCount;
             var symbolsAndCoordinates = GetAllColors(textBlock, firstCoordinates, downloadedImage);
-            CreateOutputInfo(symbolsAndCoordinates);
-            Console.WriteLine(); //TODO continue 
+            var symbolsAndHashes = CreateOutputHashesInfo(symbolsAndCoordinates);
+            var noise = GenerateSymbolNoise(symbolsAndCoordinates);
+            OutputInfo outputInfo = new OutputInfo(firstCoordinates, offsetCount,
+                symbolsAndHashes, noise);
+            string outputData = CreateOutputString(outputInfo);
+            byte[] dataForSaving = RijndaelAlgorithm.Encrypt(outputData);
+            SaveOutput(dataForSaving);
+
+
+            //ExecuteDecrypt();
         }
 
         public void ExecuteDecrypt()
         {
-            
+            string path = "/Users/olehstelmakh/Desktop/output.txt";
+            byte[] inputData = File.ReadAllBytes(path);
+            string decriptedData = RijndaelAlgorithm.Decrypt(inputData);
+
+            Console.WriteLine();
         }
 
-        
+        private void SaveOutput(byte[] data)
+        {
+            string path = "/Users/olehstelmakh/Desktop/output.txt";
+            File.WriteAllBytes(path, data);
+        }
+
+        private string CreateOutputString(OutputInfo outputInfo)
+        {
+            StringBuilder stringBuilder = new StringBuilder(10000);
+            var commonInfo = new Dictionary<char, List<string>>(outputInfo.NoiseSymbols);
+            foreach (var instance in outputInfo.SymbolsAndHashes)
+            {
+                commonInfo.Add(instance.Key, instance.Value);
+            }
+            commonInfo = commonInfo.OrderBy(x => x.Key).ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            stringBuilder.Append(outputInfo.FirstCoordinates.Color.Name);
+            stringBuilder.Append(outputInfo.Offset.ToString() + "\n");
+            foreach (var info in commonInfo)
+            {
+                stringBuilder.Append(info.Key + " ");
+                for (int i = 0; i < info.Value.Count; i++)
+                {
+                    stringBuilder.Append(info.Value[i] + " ");
+                }
+                stringBuilder.Append("\n");
+            }
+            return stringBuilder.ToString();
+        }
 
         private string _message = "Hello world Lorem sipao hdbae kakebc sdahrak";
 
@@ -92,7 +131,7 @@ namespace Stegnote
             return keyValues;
         }
 
-        private void CreateOutputInfo(Dictionary<char, List<Coordinates>> symbolsAndColors)
+        private Dictionary<char, List<string>> CreateOutputHashesInfo(Dictionary<char, List<Coordinates>> symbolsAndColors)
         {
 
             Dictionary<char, List<string>> symbolsAndHashes = new Dictionary<char, List<string>>();
@@ -102,19 +141,45 @@ namespace Stegnote
                 symbolsAndHashes.Add(symbolWithColors.Key, new List<string>());
                 foreach(var colorCoord in symbolWithColors.Value)
                 {
-                    string hash = GenerateUniqueValue256(colorCoord);
+                    string input = colorCoord.X.ToString() + colorCoord.Color.Name + colorCoord.Y.ToString();
+                    string hash = GenerateUniqueValue256(input);
                     symbolsAndHashes[symbolWithColors.Key].Add(hash);
                 }
             }
 
-            OutputInfo.symbolsAndHashes = symbolsAndHashes;
+            return symbolsAndHashes;
         }
-        
 
-        private string GenerateUniqueValue256(Coordinates coordinates)
+        private Dictionary<char, List<string>> GenerateSymbolNoise(Dictionary<char, List<Coordinates>> symbolsAndColors) 
         {
-            string input = coordinates.X.ToString() + coordinates.Color.Name + coordinates.Y.ToString();
+            Dictionary<char, List<string>> noiseSymbolsAndHashes = new Dictionary<char, List<string>>();
 
+            HashSet<char> existingSymbols = new HashSet<char>(symbolsAndColors.Select(x => x.Key));
+            int maxAmountOfColors= symbolsAndColors.Max(x => x.Value.Count) + 2;
+            HashSet<char> ASCIIchars = new HashSet<char>();
+            for (int i = 33; i < 128; i++)
+            {
+                ASCIIchars.Add((char)i);
+            }
+            ASCIIchars.ExceptWith(existingSymbols);
+            Random random = new Random();
+            foreach (var symbol in ASCIIchars)
+            {
+                noiseSymbolsAndHashes.Add(symbol, new List<string>());
+                int hashesAmount = random.Next(1, maxAmountOfColors);
+                for (int i = 0; i < hashesAmount; i++)
+                {
+                    string input = Convert.ToString(i, 2) + new string(symbol, 8) + Convert.ToString(i, 2);
+                    string hash = GenerateUniqueValue256(input);
+                    noiseSymbolsAndHashes[symbol].Add(hash);
+                }
+            }
+
+            return noiseSymbolsAndHashes;
+        }
+
+        private string GenerateUniqueValue256(string input)
+        {
             SHA256 shaHash = SHA256.Create();
             byte[] data = shaHash.ComputeHash(Encoding.UTF8.GetBytes(input));
 

@@ -39,6 +39,7 @@
     <Compile Include="Models\MessageInfo.cs" />
     <Compile Include="Models\Coordinates.cs" />
     <Compile Include="Models\OutputInfo.cs" />
+    <Compile Include="RijndaelAlgorithm.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />

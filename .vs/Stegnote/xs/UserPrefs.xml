@@ -1,7 +1,7 @@
 ﻿<Properties StartupConfiguration="{BEA9A530-92F9-44DC-947B-35E030E35111}|Default">
   <MonoDevelop.Ide.Workbench ActiveDocument="Stegnote/Program.cs">
     <Files>
-      <File FileName="Stegnote/Program.cs" Line="53" Column="1" />
+      <File FileName="Stegnote/Program.cs" Line="47" Column="10" />
       <File FileName="Stegnote/Models/Coordinates.cs" />
       <File FileName="Stegnote/Models/OutputInfo.cs" />
       <File FileName="Stegnote/Models/MessageInfo.cs" />
@@ -12,8 +12,9 @@
         <State name="__root__">
           <Node name="Stegnote" expanded="True">
             <Node name="Stegnote" expanded="True">
-              <Node name="Models" expanded="True" />
-              <Node name="Program.cs" selected="True" />
+              <Node name="Models" expanded="True">
+                <Node name="OutputInfo.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>
@@ -24,8 +25,7 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|anycpu" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/Users/olehstelmakh/Projects/Stegnote/Stegnote/Program.cs" relfile="Stegnote/Program.cs" line="50" column="1" />
-      <Breakpoint file="/Users/olehstelmakh/Projects/Stegnote/Stegnote/Program.cs" relfile="Stegnote/Program.cs" line="52" column="1" />
+      <Breakpoint file="/Users/olehstelmakh/Projects/Stegnote/Stegnote/Program.cs" relfile="Stegnote/Program.cs" line="56" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />

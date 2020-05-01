@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+
 namespace Stegnote.Models
 {
     public class OutputInfo
@@ -6,6 +7,8 @@ namespace Stegnote.Models
         public static Coordinates first { get; set; }
 
         public static int offset { get; set; }
+
+        public static Dictionary<char, List<string>> symbolsAndHashes { get; set; }
 
         public OutputInfo()
         {

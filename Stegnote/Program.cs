@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -51,6 +52,7 @@ namespace Stegnote
             int offsetCount = CalcuteOffset(firstCoordinates);
             OutputInfo.offset = offsetCount;
             var symbolsAndCoordinates = GetAllColors(textBlock, firstCoordinates, downloadedImage);
+            CreateOutputInfo(symbolsAndCoordinates);
             Console.WriteLine(); //TODO continue 
         }
 
@@ -88,6 +90,42 @@ namespace Stegnote
                 }
             }
             return keyValues;
+        }
+
+        private void CreateOutputInfo(Dictionary<char, List<Coordinates>> symbolsAndColors)
+        {
+
+            Dictionary<char, List<string>> symbolsAndHashes = new Dictionary<char, List<string>>();
+
+            foreach(var symbolWithColors in symbolsAndColors)
+            {
+                symbolsAndHashes.Add(symbolWithColors.Key, new List<string>());
+                foreach(var colorCoord in symbolWithColors.Value)
+                {
+                    string hash = GenerateUniqueValue256(colorCoord);
+                    symbolsAndHashes[symbolWithColors.Key].Add(hash);
+                }
+            }
+
+            OutputInfo.symbolsAndHashes = symbolsAndHashes;
+        }
+        
+
+        private string GenerateUniqueValue256(Coordinates coordinates)
+        {
+            string input = coordinates.X.ToString() + coordinates.Color.Name + coordinates.Y.ToString();
+
+            SHA256 shaHash = SHA256.Create();
+            byte[] data = shaHash.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+            StringBuilder sBuilder = new StringBuilder();
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                sBuilder.Append(data[i].ToString("x2"));
+            }
+
+            return sBuilder.ToString();
         }
 
         private bool checkIfColorExist()

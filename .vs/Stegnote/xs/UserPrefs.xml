@@ -2,7 +2,7 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Stegnote/Program.cs">
     <Files>
       <File FileName="Stegnote/Program.cs" Line="85" Column="1" />
-      <File FileName="Stegnote/Parser.cs" Line="68" Column="63" />
+      <File FileName="Stegnote/Parser.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">

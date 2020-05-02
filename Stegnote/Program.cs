@@ -37,10 +37,8 @@ namespace Stegnote
         private Pixel getFirstRandomCoordinates(ImageInfo image)
         {
             Random random = new Random();
-            //int x = random.Next(image.Width);
-            //int y = random.Next(image.Height);
-            int x = 0;
-            int y = 0;
+            int x = random.Next(image.Width);
+            int y = random.Next(image.Height);
             Color color = downloadedImage.Pixels[y, x];
             Pixel coordinates = new Pixel(x, y, color);
             return coordinates;
@@ -50,7 +48,7 @@ namespace Stegnote
         {
             Pixel firstCoordinates = getFirstRandomCoordinates(downloadedImage);
             string textBlock = Message.ToLower();
-            int offsetCount = CalcuteOffset(firstCoordinates);
+            int offsetCount = CalcuteOffset(firstCoordinates, downloadedImage);
             var symbolsAndCoordinates = GetAllColors(textBlock, firstCoordinates, downloadedImage);
             var symbolsAndHashes = CreateOutputHashesInfo(symbolsAndCoordinates);
             var noise = GenerateSymbolNoise(symbolsAndCoordinates);
@@ -89,6 +87,7 @@ namespace Stegnote
         {
             int count = 1;
             Pixel pixel = new Pixel();
+            List<Pixel> pixels = new List<Pixel>();
 
             for (int i=0; i< image.Height; i++)
             {
@@ -103,6 +102,7 @@ namespace Stegnote
                         {
                             return new Pixel(j, i, color);
                         }
+                        //pixels.Add(new Pixel(j, i, color));
                         count++;
                     }
                 }
@@ -290,12 +290,17 @@ namespace Stegnote
 
         }
 
-        private int CalcuteOffset(Pixel firstCoordinates)
+        private int CalcuteOffset(Pixel firstCoordinates, ImageInfo imageInfo)
         {
             int offsetCount = 0;
             for (int i = 0; i <= firstCoordinates.Y; i++)
             {
-                for (int j = 0; j <= firstCoordinates.X; j++)
+                int predicate = imageInfo.Width;
+                if (i==firstCoordinates.Y)
+                {
+                    predicate = firstCoordinates.X + 1;
+                } 
+                for (int j = 0; j < predicate; j++)
                 {
                     if (downloadedImage.Pixels[i, j].A == firstCoordinates.Color.A &&
                         downloadedImage.Pixels[i, j].R == firstCoordinates.Color.R &&

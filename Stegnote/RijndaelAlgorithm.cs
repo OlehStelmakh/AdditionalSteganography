@@ -5,12 +5,18 @@ namespace Stegnote
 {
     public class RijndaelAlgorithm
     {
+
+        private static byte[] key = new byte[32] {10, 100, 10, 100, 10, 100, 10, 100, 10, 100, 10, 100, 10, 100, 10, 100, 10, 100,
+                    10, 100,10, 100,10, 100,10, 100,10, 100,10, 100,10, 100};
+        private static byte[] IV = new byte[16] { 10, 100, 32, 122, 33, 41, 44, 65, 128, 42, 95, 100, 25, 10, 100, 10 };
+
         public static byte[] Encrypt(string textForEncrypt)
         {
             using (RijndaelManaged myRijndael = new RijndaelManaged())
             {
-                //TODO SAVE KEY AND IV to file 
-                byte[] encrypted = EncryptStringToBytes(textForEncrypt, myRijndael.Key, myRijndael.IV);
+                //TODO SAVE KEY AND IV to file
+
+                byte[] encrypted = EncryptStringToBytes(textForEncrypt, key, IV);
                 return encrypted;
             }
         }
@@ -20,7 +26,7 @@ namespace Stegnote
             using (RijndaelManaged myRijndael = new RijndaelManaged())
             {
                 //TODO READ KEY AND IV
-                string decrypted = DecryptStringFromBytes(textForDecrypt, myRijndael.Key, myRijndael.IV);
+                string decrypted = DecryptStringFromBytes(textForDecrypt, key, IV);
                 return decrypted;
             }
         }

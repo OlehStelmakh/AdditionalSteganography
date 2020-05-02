@@ -4,7 +4,7 @@ namespace Stegnote.Models
 {
     public class OutputInfo
     {
-        public Coordinates FirstCoordinates { get; set; }
+        public Pixel FirstCoordinates { get; set; }
 
         public int Offset { get; set; }
 
@@ -12,13 +12,16 @@ namespace Stegnote.Models
 
         public Dictionary<char, List<string>> NoiseSymbols { get; set; }
 
-        public OutputInfo(Coordinates first, int offset, Dictionary<char, List<string>> symbolsAndHashes,
-            Dictionary<char, List<string>> noiseSymbols)
+        public int LengthOfText { get; set; }
+
+        public OutputInfo(Pixel first, int offset, Dictionary<char, List<string>> symbolsAndHashes,
+            Dictionary<char, List<string>> noiseSymbols, int lengthOfText)
         {
             FirstCoordinates = first;
             Offset = offset;
             SymbolsAndHashes = symbolsAndHashes;
             NoiseSymbols = noiseSymbols;
+            LengthOfText = lengthOfText;
         }
     }
 }

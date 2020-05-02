@@ -34,33 +34,34 @@ namespace Stegnote
             downloadedImage.Pixels = BitmapToArray2D(downloadedImage.Bitmap);
         }
 
-        private Coordinates getFirstRandomCoordinates(ImageInfo image)
+        private Pixel getFirstRandomCoordinates(ImageInfo image)
         {
             Random random = new Random();
-            int x = random.Next(image.Width);
-            int y = random.Next(image.Height);
-            Color color = image.Bitmap.GetPixel(x, y);
-            Coordinates coordinates = new Coordinates(x, y, color);
-            
+            //int x = random.Next(image.Width);
+            //int y = random.Next(image.Height);
+            int x = 0;
+            int y = 0;
+            Color color = downloadedImage.Pixels[y, x];
+            Pixel coordinates = new Pixel(x, y, color);
             return coordinates;
         }
         
         public void ExecuteEncrypt()
         {
-            Coordinates firstCoordinates = getFirstRandomCoordinates(downloadedImage);
+            Pixel firstCoordinates = getFirstRandomCoordinates(downloadedImage);
             string textBlock = Message.ToLower();
             int offsetCount = CalcuteOffset(firstCoordinates);
             var symbolsAndCoordinates = GetAllColors(textBlock, firstCoordinates, downloadedImage);
             var symbolsAndHashes = CreateOutputHashesInfo(symbolsAndCoordinates);
             var noise = GenerateSymbolNoise(symbolsAndCoordinates);
             OutputInfo outputInfo = new OutputInfo(firstCoordinates, offsetCount,
-                symbolsAndHashes, noise);
+                symbolsAndHashes, noise, textBlock.Length);
             string outputData = CreateOutputString(outputInfo);
             byte[] dataForSaving = RijndaelAlgorithm.Encrypt(outputData);
             SaveOutput(dataForSaving);
+         
 
-
-            //ExecuteDecrypt();
+            ExecuteDecrypt();
         }
 
         public void ExecuteDecrypt()
@@ -69,7 +70,50 @@ namespace Stegnote
             byte[] inputData = File.ReadAllBytes(path);
             string decriptedData = RijndaelAlgorithm.Decrypt(inputData);
 
+            Parser parseData = new Parser(decriptedData);
+            Color firstColor = parseData.GetColorFromString();
+            int offsetOfFirstColor = parseData.GetOffsetOfcolor();
+            var symbolsAndHashes = parseData.GetInfoAboutAllSymbols();
+            int lengthOfText = parseData.GetLengthOfText();
+            ParsedData parsedData = new ParsedData(firstColor, offsetOfFirstColor,
+                symbolsAndHashes, lengthOfText);
+
+            Pixel firstValue = GetCoordinatesOfFirst(parsedData.FirstColor, parsedData.Offset,
+                downloadedImage.Bitmap);
+
+
             Console.WriteLine();
+        }
+
+        private Pixel GetCoordinatesOfFirst(Color color, int offset, Bitmap image)
+        {
+            int count = 1;
+            Pixel pixel = new Pixel();
+
+            for (int i=0; i< image.Height; i++)
+            {
+                for (int j=0; j< image.Width; j++)
+                {
+                    if (color.A == downloadedImage.Pixels[i, j].A &&
+                        color.R == downloadedImage.Pixels[i, j].R &&
+                        color.G == downloadedImage.Pixels[i, j].G &&
+                        color.B == downloadedImage.Pixels[i, j].B)
+                    {
+                        if (offset == count)
+                        {
+                            return new Pixel(j, i, color);
+                        }
+                        count++;
+                    }
+                }
+            }
+
+            return pixel;
+        }
+
+        private void DecrypteText(ParsedData parsedData)
+        {
+
         }
 
         private void SaveOutput(byte[] data)
@@ -99,6 +143,7 @@ namespace Stegnote
                 }
                 stringBuilder.Append("\n");
             }
+            stringBuilder.Append(outputInfo.LengthOfText.ToString() + "\n");
             return stringBuilder.ToString();
         }
 
@@ -110,11 +155,11 @@ namespace Stegnote
             set => _message = value.ToString();
         }
 
-        private Dictionary<char, List<Coordinates>> GetAllColors(string text, Coordinates firstCoordinates, ImageInfo imageInfo)
+        private Dictionary<char, List<Pixel>> GetAllColors(string text, Pixel firstCoordinates, ImageInfo imageInfo)
         {
-            Dictionary<char, List<Coordinates>> keyValues = new Dictionary<char, List<Coordinates>>();
+            Dictionary<char, List<Pixel>> keyValues = new Dictionary<char, List<Pixel>>();
 
-            Coordinates previousCoordinates = firstCoordinates;
+            Pixel previousCoordinates = firstCoordinates;
             for (int i = 0; i< text.Length; i++)
             {
                 char symbol = text[i];
@@ -125,13 +170,13 @@ namespace Stegnote
                 }
                 else
                 {
-                    keyValues.Add(symbol, new List<Coordinates>() { previousCoordinates });
+                    keyValues.Add(symbol, new List<Pixel>() { previousCoordinates });
                 }
             }
             return keyValues;
         }
 
-        private Dictionary<char, List<string>> CreateOutputHashesInfo(Dictionary<char, List<Coordinates>> symbolsAndColors)
+        private Dictionary<char, List<string>> CreateOutputHashesInfo(Dictionary<char, List<Pixel>> symbolsAndColors)
         {
 
             Dictionary<char, List<string>> symbolsAndHashes = new Dictionary<char, List<string>>();
@@ -150,7 +195,7 @@ namespace Stegnote
             return symbolsAndHashes;
         }
 
-        private Dictionary<char, List<string>> GenerateSymbolNoise(Dictionary<char, List<Coordinates>> symbolsAndColors) 
+        private Dictionary<char, List<string>> GenerateSymbolNoise(Dictionary<char, List<Pixel>> symbolsAndColors) 
         {
             Dictionary<char, List<string>> noiseSymbolsAndHashes = new Dictionary<char, List<string>>();
 
@@ -199,7 +244,7 @@ namespace Stegnote
         }
 
 
-        private Coordinates GetNextCoordinates(Coordinates previousCoordinates, ImageInfo imageInfo)
+        private Pixel GetNextCoordinates(Pixel previousCoordinates, ImageInfo imageInfo)
         {
             int maxX = imageInfo.Width;
             int maxY = imageInfo.Height;
@@ -241,19 +286,23 @@ namespace Stegnote
                 Y -= maxY;
             }
 
-            return new Coordinates(X, Y, imageInfo.Bitmap.GetPixel(X, Y));
+            return new Pixel(X, Y, imageInfo.Bitmap.GetPixel(X, Y));
 
         }
 
-        private int CalcuteOffset(Coordinates firstCoordinates)
+        private int CalcuteOffset(Pixel firstCoordinates)
         {
             int offsetCount = 0;
-            for (int i = 0; i < firstCoordinates.X; i++)
+            for (int i = 0; i <= firstCoordinates.Y; i++)
             {
-                for (int j = 0; j < firstCoordinates.Y; j++)
+                for (int j = 0; j <= firstCoordinates.X; j++)
                 {
-                    if (downloadedImage.Pixels[i, j].Name == firstCoordinates.Color.Name)
+                    if (downloadedImage.Pixels[i, j].A == firstCoordinates.Color.A &&
+                        downloadedImage.Pixels[i, j].R == firstCoordinates.Color.R &&
+                        downloadedImage.Pixels[i, j].G == firstCoordinates.Color.G &&
+                        downloadedImage.Pixels[i, j].B == firstCoordinates.Color.B)
                     {
+
                         offsetCount++;
                     }
                 }
@@ -263,7 +312,7 @@ namespace Stegnote
         
         private Color[,] BitmapToArray2D(Bitmap image)
         {
-            Color[,] array2D = new Color[image.Width, image.Height];
+            Color[,] array2D = new Color[image.Height, image.Width];
  
             BitmapData bitmapData = image.LockBits(new Rectangle(0, 0, image.Width, image.Height),
                 ImageLockMode.ReadWrite, PixelFormat.Format32bppRgb);
@@ -274,9 +323,9 @@ namespace Stegnote
 
                 int paddingOffset = bitmapData.Stride - (image.Width * 4);
 
-                for (int i = 0; i < image.Width; i++)
+                for (int i = 0; i < image.Height; i++)
                 {
-                    for (int j = 0; j < image.Height; j++)
+                    for (int j = 0; j < image.Width; j++)
                     {
                         byte[] temp = new byte[4];
                         temp[0] = address[0];

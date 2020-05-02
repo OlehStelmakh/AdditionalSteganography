@@ -3,13 +3,13 @@ using System.Drawing;
 
 namespace Stegnote.Models
 {
-    public struct Coordinates
+    public struct Pixel
     {
         public int X { get; }
         public int Y { get; }
         public Color Color { get; }
 
-        public Coordinates(int x, int y, Color color)
+        public Pixel(int x, int y, Color color)
         {
             X = x;
             Y = y;

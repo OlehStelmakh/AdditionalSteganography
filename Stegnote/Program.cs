@@ -14,16 +14,7 @@ namespace Stegnote
     public class MainCalculations
     {
 
-        public Bitmap bm { set; get; }
-
         public ImageInfo downloadedImage { set; get; }
-
-        public MessageInfo messageInfo { set; get; }
-
-        public MainCalculations()
-        {
-
-        }
 
         public void ExecuteOpenFileDialog()
         {
@@ -58,8 +49,6 @@ namespace Stegnote
             byte[] dataForSaving = RijndaelAlgorithm.Encrypt(outputData);
             SaveOutput(dataForSaving);
          
-
-            ExecuteDecrypt();
         }
 
         public void ExecuteDecrypt()
@@ -79,15 +68,47 @@ namespace Stegnote
             Pixel firstValue = GetCoordinatesOfFirst(parsedData.FirstColor, parsedData.Offset,
                 downloadedImage.Bitmap);
 
-
+            string text = DecryptText(parsedData, firstValue, downloadedImage);
             Console.WriteLine();
+        }
+
+        private string DecryptText(ParsedData parsedData, Pixel firstCoordinates, ImageInfo imageInfo)
+        {
+            StringBuilder stringBuilder = new StringBuilder(parsedData.LengthOfText);
+
+            Pixel previousCoordinates = firstCoordinates;
+            for (int i = 0; i < parsedData.LengthOfText; i++)
+            {
+                previousCoordinates = GetNextCoordinates(previousCoordinates, imageInfo);
+                stringBuilder.Append(FindSymbolInHashes(parsedData, previousCoordinates));
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        private char FindSymbolInHashes(ParsedData parsedData, Pixel pixel)
+        {
+            string input = pixel.X.ToString() + pixel.Color.Name + pixel.Y.ToString();
+            string hash = GenerateUniqueValue256(input);
+
+            foreach (var symbolAndHashes in parsedData.SymbolsAndHashes)
+            {
+                var values = parsedData.SymbolsAndHashes[symbolAndHashes.Key];
+                for (int i = 0; i < values.Count; i++)
+                {
+                    if (values[i]==hash)
+                    {
+                        return symbolAndHashes.Key;
+                    }
+                }
+            }
+            throw new Exception("Hash not found");
         }
 
         private Pixel GetCoordinatesOfFirst(Color color, int offset, Bitmap image)
         {
             int count = 1;
             Pixel pixel = new Pixel();
-            List<Pixel> pixels = new List<Pixel>();
 
             for (int i=0; i< image.Height; i++)
             {
@@ -102,18 +123,12 @@ namespace Stegnote
                         {
                             return new Pixel(j, i, color);
                         }
-                        //pixels.Add(new Pixel(j, i, color));
                         count++;
                     }
                 }
             }
 
             return pixel;
-        }
-
-        private void DecrypteText(ParsedData parsedData)
-        {
-
         }
 
         private void SaveOutput(byte[] data)
@@ -379,7 +394,7 @@ namespace Stegnote
         {
             MainCalculations main = new MainCalculations();
             main.ExecuteOpenFileDialog();
-            main.ExecuteEncrypt();
+            main.ExecuteDecrypt();
         }
     }
 

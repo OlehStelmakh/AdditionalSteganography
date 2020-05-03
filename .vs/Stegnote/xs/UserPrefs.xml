@@ -1,16 +1,20 @@
 ﻿<Properties StartupConfiguration="{BEA9A530-92F9-44DC-947B-35E030E35111}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Stegnote/Program.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Stegnote/Models/Pixel.cs">
     <Files>
-      <File FileName="Stegnote/Program.cs" Line="85" Column="1" />
-      <File FileName="Stegnote/Parser.cs" />
+      <File FileName="Stegnote/Models/ImageInfo.cs" Line="1" Column="1" />
+      <File FileName="Stegnote/Models/MessageInfo.cs" Line="1" Column="1" />
+      <File FileName="Stegnote/Models/OutputInfo.cs" Line="1" Column="1" />
+      <File FileName="Stegnote/Models/ParsedData.cs" Line="1" Column="1" />
+      <File FileName="Stegnote/Models/Pixel.cs" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="Stegnote" expanded="True">
             <Node name="Stegnote" expanded="True">
-              <Node name="Models" expanded="True" />
-              <Node name="Program.cs" selected="True" />
+              <Node name="Models" expanded="True">
+                <Node name="Pixel.cs" selected="True" />
+              </Node>
             </Node>
           </Node>
         </State>
@@ -20,9 +24,7 @@
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|anycpu" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore>
-      <Breakpoint file="/Users/olehstelmakh/Projects/Stegnote/Stegnote/Program.cs" relfile="Stegnote/Program.cs" line="52" column="1" />
-    </BreakpointStore>
+    <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.ItemProperties.Stegnote PreferredExecutionTarget="MonoDevelop.Default" />

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using Color = System.Drawing.Color;
 
 namespace Stegnote.Models
@@ -26,47 +24,3 @@ namespace Stegnote.Models
 
     }
 }
-    /*public class Pixel : IComparable
-    {
-        public string Color { get; set; }
-        public int Amount { get; set; }
-        public List<Coordinates> Coordinates { get; set; }
-
-        public Pixel(string color)
-        {
-            Color = color;
-        }
-
-        public Pixel(string color, int amount, List<Coordinates> coordinates) : this(color)
-        {
-            Amount = amount;
-            Coordinates = coordinates;
-        }
-
-        public int CompareTo(object obj)
-        {
-            if (obj == null) { return 1; }
-            Pixel pixel = obj as Pixel;
-            if (pixel != null)
-            {
-                return this.Color.CompareTo(pixel.Color);
-            }
-            else
-            {
-                throw new ArgumentException("Object is not pixel");
-            }
-        }
-    }*/
-
-    /*public struct Coordinates
-    {
-        public Coordinates(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-
-        public int X;
-        public int Y;
-    }*/
-//}
